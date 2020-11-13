@@ -25,7 +25,7 @@ main(int argc, char *argv[])
         close(child_fd[0]);
         // 关闭不用的fd
         read(parent_fd[0], buf, 4);
-        fprintf(2, "%d: received %s\n", getpid(), buf);
+        printf("%d: received %s\n", getpid(), buf);
         write(child_fd[1], "pong", strlen("pong"));
     }
     else
@@ -36,7 +36,7 @@ main(int argc, char *argv[])
         // 关闭不用的fd
         write(parent_fd[1], "ping", strlen("ping"));
         read(child_fd[0], buf, 4);
-        fprintf(2, "%d: received %s\n", getpid(), buf);
+        printf("%d: received %s\n", getpid(), buf);
     }
 
     exit();
