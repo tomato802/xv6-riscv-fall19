@@ -16,7 +16,7 @@
 struct devsw devsw[NDEV];
 struct {
   struct spinlock lock;
-  struct file file[NFILE];
+  // struct file file[NFILE];
 } ftable;
 
 void
@@ -32,13 +32,24 @@ filealloc(void)
   struct file *f;
 
   acquire(&ftable.lock);
-  for(f = ftable.file; f < ftable.file + NFILE; f++){
-    if(f->ref == 0){
-      f->ref = 1;
-      release(&ftable.lock);
-      return f;
-    }
+  // for(f = ftable.file; f < ftable.file + NFILE; f++){
+  //   if(f->ref == 0){
+  //     f->ref = 1;
+  //     release(&ftable.lock);
+  //     return f;
+  //   }
+  // }
+  f = (struct file*)bd_malloc(sizeof(struct file));
+  if (f)
+  {
+    memset(f, 0, sizeof(struct file));
+    // 将分配的内存清零
+    f->ref = 1;
+    // 修改f->ref仍需要ftable.lock保护
+    release(&ftable.lock);
+    return f;
   }
+  // 分配失败返回0
   release(&ftable.lock);
   return 0;
 }
@@ -59,7 +70,7 @@ filedup(struct file *f)
 void
 fileclose(struct file *f)
 {
-  struct file ff;
+  // struct file ff;
 
   acquire(&ftable.lock);
   if(f->ref < 1)
@@ -68,18 +79,21 @@ fileclose(struct file *f)
     release(&ftable.lock);
     return;
   }
-  ff = *f;
+  // ff = *f;
   f->ref = 0;
-  f->type = FD_NONE;
+  // 修改f->ref仍需要ftable.lock保护
+  // f->type = FD_NONE;
   release(&ftable.lock);
 
-  if(ff.type == FD_PIPE){
-    pipeclose(ff.pipe, ff.writable);
-  } else if(ff.type == FD_INODE || ff.type == FD_DEVICE){
-    begin_op(ff.ip->dev);
-    iput(ff.ip);
-    end_op(ff.ip->dev);
+  if(f->type == FD_PIPE){
+    pipeclose(f->pipe, f->writable);
+  } else if(f->type == FD_INODE || f->type == FD_DEVICE){
+    begin_op(f->ip->dev);
+    iput(f->ip);
+    end_op(f->ip->dev);
   }
+  f->type = FD_NONE;    // 最后修改f->type
+  bd_free(f);
 }
 
 // Get metadata about file f.
