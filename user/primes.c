@@ -24,11 +24,13 @@ sink(int *fd)
         if (fork() == 0)
         {
             /* Child */
+            // 关闭下一个管道的读入端，仅用于写入
             close(fd_next[0]);
             while (read(fd[0], &x, sizeof(x)))
             {
                 if (x % prime != 0)
                 {
+                    // 排除掉prime的倍数后，写入下一管道
                     write(fd_next[1], &x, sizeof(x));
                 }
             }
