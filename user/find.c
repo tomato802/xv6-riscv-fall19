@@ -57,7 +57,7 @@ find(char *path, char *filename)
             
         case T_DIR:
             // 若为目录，则继续递归调用find
-            if (strlen(path) + 1 + DIRSIZ + 1 > sizeof buf)
+            if (strlen(path) + 1 + DIRSIZ + 1 > sizeof (buf))
             {
                 fprintf(2, "find: path too long\n");
                 break;
