@@ -176,24 +176,6 @@ runcmd(cmd command)
     
     if(command.type & PIPE)
     {
-        if (strlen(command.input))
-        {
-            close(0);
-            if (open(command.input, O_RDONLY) < 0)
-            {
-                fprintf(2, "open %s failed\n", command.input);
-                exit(-1);
-            }
-        }
-        if (strlen(command.output))
-        {
-            close(1);
-            if (open(command.output, O_CREATE|O_WRONLY) < 0)
-            {
-                fprintf(2, "open %s failed\n", command.output);
-                exit(-1);
-            }
-        }
         pipe(p);
         parsecmd(&rcommand, command.right);   
         if (fork() == 0)
